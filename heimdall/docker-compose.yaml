@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+
+  heimdall:
+    image: linuxserver/heimdall:latest
+    container_name: heimdall
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ${HEIMDALL_DIR}:/config
+    ports:
+      - 4480:80
+    restart: unless-stopped
