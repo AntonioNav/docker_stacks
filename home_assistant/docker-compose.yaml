@@ -1,0 +1,53 @@
+version: '3'
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    volumes:
+      - ${HOMEASSISTANT_DIR}:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    environment:
+      - LETSENCRYPT_HOST=${HOMEASSISTANT_EXTERNAL_DOMAIN}
+      - VIRTUAL_HOST=${HOMEASSISTANT_EXTERNAL_DOMAIN}
+      - VIRTUAL_PORT=8123
+
+  broker:
+    image: eclipse-mosquitto:latest
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /docker_data/mosquitto:/mosquitto
+    ports:
+      - "1883:1883"
+    restart: unless-stopped
+
+  node-red:
+    image: nodered/node-red:latest
+    environment:
+      - TZ=Europe/Madrid
+    volumes:
+      - ${NODERED_DIR}:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    user: "0"
+    ports:
+      - "1880:1880"
+    restart: unless-stopped
+
+  zigbee2mqtt:
+    image: koenkk/zigbee2mqtt
+    container_name: zigbee2mqtt
+    restart: unless-stopped
+    volumes:
+      - ${ZIGBEE2MQTT_DIR}:/app/data
+      - /run/udev:/run/udev:ro
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=Europe/Madrid
+    devices:
+      - ${ZIGBEE_DEVICE}:${ZIGBEE_DEVICE}
+      
